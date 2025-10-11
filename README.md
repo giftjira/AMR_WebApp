@@ -43,7 +43,6 @@ Task progress and AMR status are updated in real-time in the web app.
 
 ## System Overview
 
-```markdown
 ![System Overview](assets/amr_detail3.png)
 
 Workers interact with AMR via a web app accessible on Panel PCs and handheld devices. The app shows AMR task requests, status updates, and ongoing operations. Panel PCs support start-point operations, while handheld devices are used at end points.
