@@ -54,6 +54,17 @@ Workers interact with AMR via a web app accessible on Panel PCs and handheld dev
 
 ---
 
+## System Architecture
+
+![System Architecture](assets/amr_detail4.png)
+
+- RCS (Robot Control System) manages AMR hardware, maps, and task configurations.
+- Walle application used for configuration and setup.
+- Web App communicates with AMR via API, storing state in a MySQL database linked to user commands.
+- Development tools: React (front-end), Postman, and VS Code for API and system testing.
+
+---
+
 ## Part Handling
 
 ```mermaid
@@ -112,23 +123,23 @@ sequenceDiagram
 **Description:**  
 This diagram represents the standard Part Preparation (DY) process for both Go (Start → End) and Return (End → Start) phases.
 
-Go Phase:
+**Go Phase:**
 
-The operator marks a start location as Ready.
+- The operator marks a start location as Ready.
 
-The backend calls the Robot API to send the cart to its end location.
+- The backend calls the Robot API to send the cart to its end location.
 
-While subTaskStatus=1, the UI shows “Going ⇒”.
+- While subTaskStatus=1, the UI shows “Going ⇒”.
 
-When the robot finishes (subTaskStatus=3), the end spot becomes “Prepare” for the next cycle.
+- When the robot finishes (subTaskStatus=3), the end spot becomes “Prepare” for the next cycle.
 
-Return Phase:
+**Return Phase:**
 
-Triggered from the Virtual page, reversing the path.
+- Triggered from the Virtual page, reversing the path.
 
-During travel (subTaskStatus=1), both Start and End are shown as “Waiting”.
+- During travel (subTaskStatus=1), both Start and End are shown as “Waiting”.
 
-When finished (subTaskStatus=3), the row resets to “Prepare + Waiting”.
+- When finished (subTaskStatus=3), the row resets to “Prepare + Waiting”.
 
 This sequence forms the basic “pick & return” workflow for DY operations.
 
@@ -195,21 +206,21 @@ sequenceDiagram
 **Description:**  
 MB (Motor Base) spots use FG-01 / FG-02 as shared output lanes, managed through the mem_location table.
 
-When MB “Ready” is clicked:
+**When MB “Ready” is clicked:**
 
-The backend reserves one FG slot by writing from_spot and id_partPrepare into mem_location.
+- The backend reserves one FG slot by writing from_spot and id_partPrepare into mem_location.
 
-If both FG slots are busy, new MB tasks are marked Queue until a slot frees up.
+- If both FG slots are busy, new MB tasks are marked Queue until a slot frees up.
 
-The robot is commanded to move the cart (Go phase).
+- The robot is commanded to move the cart (Go phase).
 
-When the robot returns (subTaskStatus=3):
+**When the robot returns (subTaskStatus=3):**
 
-The checker clears the FG slot in mem_location.
+- The checker clears the FG slot in mem_location.
 
-Any queued MB rows are promoted (Queue → In Use).
+- Any queued MB rows are promoted (Queue → In Use).
 
-The finished task’s status_start='In Use' and status_end='Waiting'.
+- The finished task’s status_start='In Use' and status_end='Waiting'.
 
 This allows controlled concurrency and prevents both FG lanes from being used simultaneously.
 
@@ -274,13 +285,13 @@ sequenceDiagram
 **Description:** 
 The Packing flow is similar to Part (DY) but is grouped by selected start spot.
 
-When an operator presses “Ready”, only one row per start spot can be active — other rows for that start spot are set to “-”.
+- When an operator presses “Ready”, only one row per start spot can be active — other rows for that start spot are set to “-”.
 
-The backend calls the Robot API and saves the new orderId.
+- The backend calls the Robot API and saves the new orderId.
 
-During robot movement (subTaskStatus=1), statuses flip to “Waiting / Ready”.
+- During robot movement (subTaskStatus=1), statuses flip to “Waiting / Ready”.
 
-When finished (subTaskStatus=3), the completed row becomes “Finish”, and the next one in the same start spot queue is promoted to Prepare.
+- When finished (subTaskStatus=3), the completed row becomes “Finish”, and the next one in the same start spot queue is promoted to Prepare.
 
 This provides continuous packaging flow while ensuring only one active cart per loading zone.
 
