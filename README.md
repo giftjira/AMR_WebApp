@@ -1,8 +1,8 @@
-Overview
+# Overview
 
 The AMR Project enables automated material handling within a manufacturing facility. The system allows workers to request autonomous carts from a web app on handheld devices or touchscreen terminals, while tracking AMR tasks in real-time.
 
-Features
+# Features
 
 🚗 AMR commutes material carts between designated start and end points.
 
@@ -15,7 +15,7 @@ Features
 🔄 Web app communicates with AMR via API, with task and status stored in a MySQL database.
 
 
-Technologies
+# vTechnologies
 
 AMR hardware + RCS (Robot Control System)
 
@@ -28,7 +28,7 @@ Backend: MySQL database + API integration
 Development Tools: Postman, VS Code
 
 
-Workflow
+# Workflow
 
 Worker selects start and end point via handheld or touchscreen device.
 
@@ -39,14 +39,18 @@ RCS executes AMR task, managed by Walle configuration.
 Task progress and AMR status are updated in real-time in the web app.
 
 
-How it works
+# How it works
 
+## System Overview
+
+```markdown
 ![System Overview](assets/amr_detail3.png)
 
 Workers interact with AMR via a web app accessible on Panel PCs and handheld devices. The app shows AMR task requests, status updates, and ongoing operations. Panel PCs support start-point operations, while handheld devices are used at end points.
 
-Part Handling
+## Part Handling
 
+```mermaid
 sequenceDiagram
     autonumber
     participant FE as Frontend (Pare)
@@ -120,8 +124,9 @@ When finished (subTaskStatus=3), the row resets to “Prepare + Waiting”.
 This sequence forms the basic “pick & return” workflow for DY operations.
 
 
-Motor Handling
+## Motor Handling
 
+```mermaid
 sequenceDiagram
     autonumber
     participant FE as Frontend (Pare - MB)
@@ -198,7 +203,9 @@ The finished task’s status_start='In Use' and status_end='Waiting'.
 This allows controlled concurrency and prevents both FG lanes from being used simultaneously.
 
 
-Packing Material Handling
+## Packing Material Handling
+
+```mermaid
 sequenceDiagram
     autonumber
     participant FE as Frontend (Packing)
