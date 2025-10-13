@@ -64,6 +64,297 @@ Workers interact with AMR via a web app accessible on Panel PCs and handheld dev
 - Development tools: React (front-end), Postman, and VS Code for API and system testing.
 
 ---
+## Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Frontend["Frontend"]
+        App["App.js"]
+        
+        subgraph PP["ParePreparation.js"]
+            PP1["Axios GET<br/>172.16.16.210:3001<br/>/api/pare-preparation"]
+            PP2["Axios POST<br/>172.16.16.210:3001<br/>/api/pare-preparation/update-selected-end-spot"]
+            PP3["Axios GET<br/>172.16.16.210:3001<br/>/api/motor-models"]
+            PP4["Axios POST<br/>172.16.16.210:3001<br/>/api/pare-preparation/update-motor-model"]
+            PP5["Axios POST<br/>172.16.16.210:3001<br/>/api/pare-preparation/update-status"]
+            PP6["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
+        end
+        
+        subgraph VT["Virtual.js"]
+            VT1["Axios GET<br/>172.16.16.210:3001<br/>/api/virtual-data"]
+            VT2["Axios POST<br/>172.16.16.210:3001<br/>/api/virtual-update-status"]
+            VT3["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
+        end
+        
+        subgraph PKP["PickingPreparation.js"]
+            PKP1["Axios GET<br/>172.16.16.210:3001<br/>/api/packing-preparation"]
+            PKP2["Axios POST<br/>172.16.16.210:3001<br/>/api/packing-preparation/update-selected-start-spot"]
+            PKP3["Axios POST<br/>172.16.16.210:3001<br/>/api/packing-preparation/update-status"]
+            PKP4["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
+        end
+        
+        subgraph MC["ManualControl.js"]
+            MC1["Axios GET<br/>172.16.16.210:3001<br/>/api/locations"]
+            MC2["Axios POST<br/>172.16.16.210:3001<br/>/api/manual-control/move"]
+        end
+        
+        subgraph TS["Troubleshooting.js"]
+            TS1["Axios GET<br/>172.16.16.210:3001<br/>/api/troubleshooting/options"]
+            TS2["Axios GET<br/>172.16.16.210:3001<br/>/api/troubleshooting/part-rows"]
+            TS3["Axios GET<br/>172.16.16.210:3001<br/>/api/troubleshooting/pack-rows"]
+            TS4["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
+        end
+    end
+    
+    subgraph Backend["Backend - app.js (172.16.16.210:3001)"]
+        subgraph PPB["parePreparation.js"]
+            PPB1["Express GET<br/>router.get<br/>/pare-preparation"]
+            PPB2["Express POST<br/>router.post<br/>/pare-preparation/update-selected-end-spot"]
+            PPB3["Express GET<br/>router.get<br/>/motor-models"]
+            PPB4["Express POST<br/>router.post<br/>/pare-preparation/update-motor-model"]
+            PPB5["Express POST<br/>router.post<br/>/pare-preparation/update-status"]
+            PPB6["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
+        end
+        
+        subgraph VTB["virtualData.js"]
+            VTB1["Express GET<br/>router.get<br/>/virtual-data"]
+            VTB2["Express POST<br/>router.post<br/>/virtual-update-status"]
+            VTB3["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
+        end
+        
+        subgraph TSKB["taskStatusChecker.js"]
+            TSKB1["Axios POST<br/>172.16.16.210:7000<br/>/ics/out/task/getTaskOrderStatus"]
+        end
+        
+        subgraph PKPB["packingPreparation.js"]
+            PKPB1["Express GET<br/>router.get<br/>/packing-preparation"]
+            PKPB2["Express POST<br/>router.post<br/>/packing-preparation/update-selected-start-spot"]
+            PKPB3["Express POST<br/>router.post<br/>/packing-preparation/update-status"]
+            PKPB4["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
+        end
+        
+        subgraph MCB["manualControl.js"]
+            MCB1["Express GET<br/>router.get<br/>/locations"]
+            MCB2["Express POST<br/>router.post<br/>/manual-control/move"]
+            MCB3["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
+        end
+        
+        subgraph TSB["troubleshooting.js"]
+            TSB1["Express GET<br/>router.get<br/>/troubleshooting/options"]
+            TSB2["Express GET<br/>router.get<br/>/troubleshooting/part-rows"]
+            TSB3["Express GET<br/>router.get<br/>/troubleshooting/pack-rows"]
+            TSB4["Express POST<br/>router.post<br/>/troubleshooting/reset"]
+        end
+    end
+    
+    subgraph Robot["Robot API (172.16.16.210:7000)"]
+        R1["HTTP POST<br/>/ics/taskOrder/addTask<br/>payload: taskOrder"]
+        R2["HTTP POST<br/>/ics/out/task/getTaskOrderStatus<br/>payload: orderId"]
+    end
+    
+    App --> PP
+    App --> VT
+    App --> PKP
+    App --> MC
+    App --> TS
+    
+    PP1 -->|HTTP Request| PPB1
+    PP2 -->|HTTP Request| PPB2
+    PP3 -->|HTTP Request| PPB3
+    PP4 -->|HTTP Request| PPB4
+    PP5 -->|HTTP Request| PPB5
+    PP6 -->|HTTP Request| TSB4
+    
+    VT1 -->|HTTP Request| VTB1
+    VT2 -->|HTTP Request| VTB2
+    VT3 -->|HTTP Request| TSB4
+    
+    PKP1 -->|HTTP Request| PKPB1
+    PKP2 -->|HTTP Request| PKPB2
+    PKP3 -->|HTTP Request| PKPB3
+    PKP4 -->|HTTP Request| TSB4
+    
+    MC1 -->|HTTP Request| MCB1
+    MC2 -->|HTTP Request| MCB2
+    
+    TS1 -->|HTTP Request| TSB1
+    TS2 -->|HTTP Request| TSB2
+    TS3 -->|HTTP Request| TSB3
+    TS4 -->|HTTP Request| TSB4
+    
+    PPB5 -->|Triggers| PPB6
+    PPB6 -->|HTTP Request| R1
+    
+    VTB2 -->|Triggers| VTB3
+    VTB3 -->|HTTP Request| R1
+    
+    TSKB1 -->|HTTP Request| R2
+    
+    PKPB3 -->|Triggers| PKPB4
+    PKPB4 -->|HTTP Request| R1
+    
+    MCB2 -->|Triggers| MCB3
+    MCB3 -->|HTTP Request| R1
+    
+    style Frontend fill:#e1f5ff
+    style Backend fill:#fff4e1
+    style Robot fill:#ffe1e1
+```
+
+## System Components
+
+### 1. Frontend Layer (Port 3001)
+
+The frontend is built with React and consists of five main modules that communicate with the backend via Axios HTTP requests:
+
+#### **ParePreparation.js**
+Manages the part preparation workflow including:
+- Fetching current preparation status
+- Updating selected end spots for parts
+- Managing motor model selection and updates
+- Controlling preparation status (start/stop/complete)
+- Resetting troubleshooting states
+
+#### **Virtual.js**
+Handles virtual/simulation mode operations:
+- Retrieving virtual data for simulation
+- Updating virtual operation status
+- Resetting troubleshooting states
+
+#### **PickingPreparation.js**
+Controls the packing preparation process:
+- Fetching packing preparation status
+- Setting start spot locations for packing
+- Updating packing status
+- Resetting troubleshooting states
+
+#### **ManualControl.js**
+Provides manual robot control capabilities:
+- Fetching available locations
+- Sending manual movement commands to the robot
+
+#### **Troubleshooting.js**
+Diagnostic and troubleshooting interface:
+- Retrieving troubleshooting options
+- Accessing part row data
+- Accessing pack row data
+- Resetting system states
+
+### 2. Backend Layer (Express API - 172.16.16.210:3001)
+
+The backend is built with Node.js and Express, serving as the middleware between the frontend and the Robot API. It consists of six main modules:
+
+#### **parePreparation.js**
+Express endpoints for part preparation:
+- `GET /pare-preparation` - Retrieves preparation data
+- `POST /pare-preparation/update-selected-end-spot` - Updates end spot selection
+- `GET /motor-models` - Fetches available motor models
+- `POST /pare-preparation/update-motor-model` - Updates motor model selection
+- `POST /pare-preparation/update-status` - Updates status and triggers robot tasks
+
+#### **virtualData.js**
+Express endpoints for virtual operations:
+- `GET /virtual-data` - Retrieves virtual operation data
+- `POST /virtual-update-status` - Updates status and triggers robot tasks
+
+#### **taskStatusChecker.js**
+Background service that monitors robot task execution:
+- Polls the Robot API to check task order status
+- Updates internal database with task progress
+
+#### **packingPreparation.js**
+Express endpoints for packing operations:
+- `GET /packing-preparation` - Retrieves packing data
+- `POST /packing-preparation/update-selected-start-spot` - Updates start spot
+- `POST /packing-preparation/update-status` - Updates status and triggers robot tasks
+
+#### **manualControl.js**
+Express endpoints for manual robot control:
+- `GET /locations` - Retrieves available locations
+- `POST /manual-control/move` - Sends movement commands to robot
+
+#### **troubleshooting.js**
+Express endpoints for diagnostics:
+- `GET /troubleshooting/options` - Retrieves troubleshooting options
+- `GET /troubleshooting/part-rows` - Fetches part row data
+- `GET /troubleshooting/pack-rows` - Fetches pack row data
+- `POST /troubleshooting/reset` - Resets system states
+
+### 3. Robot API Layer (172.16.16.210:7000)
+
+The external Robot Control System provides two main endpoints:
+
+- `POST /ics/taskOrder/addTask` - Accepts task orders to control robot movements
+- `POST /ics/out/task/getTaskOrderStatus` - Returns current status of task orders
+
+## Data Flow
+
+### Typical Request Flow
+
+1. **User Interaction**: User interacts with a React component in the frontend
+2. **HTTP Request**: Frontend makes an Axios HTTP request to the Express backend (port 3001)
+3. **Backend Processing**: Express route handler processes the request:
+   - Validates input data
+   - Performs business logic
+   - Updates database if needed
+4. **Robot Command** (if applicable): Backend sends task orders to Robot API (port 7000)
+5. **Status Monitoring**: `taskStatusChecker.js` polls Robot API for task completion
+6. **Response**: Backend returns response to frontend
+7. **UI Update**: Frontend updates the user interface based on response
+
+### Example: Starting Part Preparation
+
+```
+User clicks "Start" button
+  → ParePreparation.js: Axios POST to /api/pare-preparation/update-status
+    → Backend parePreparation.js: router.post('/pare-preparation/update-status')
+      → Updates database status
+      → Axios POST to Robot API /ics/taskOrder/addTask
+        → Robot receives task and begins execution
+      ← Robot returns task order ID
+    ← Backend returns success response
+  ← Frontend updates UI to show "In Progress"
+```
+
+## Technology Stack
+
+- **Frontend**: React, Axios
+- **Backend**: Node.js, Express
+- **Robot Integration**: REST API (Axios)
+- **Communication Protocol**: HTTP/REST
+
+## Network Configuration
+
+- **Frontend Server**: 172.16.16.210:3001 (serves React app and API)
+- **Robot Controller**: 172.16.16.210:7000 (ICS Robot Control System)
+
+## API Endpoints Summary
+
+| Module | Frontend Route | Backend Route | Robot API |
+|--------|---------------|---------------|-----------|
+| Pare Preparation | `/api/pare-preparation/*` | `/pare-preparation/*` | `/ics/taskOrder/addTask` |
+| Virtual | `/api/virtual-*` | `/virtual-*` | `/ics/taskOrder/addTask` |
+| Packing | `/api/packing-preparation/*` | `/packing-preparation/*` | `/ics/taskOrder/addTask` |
+| Manual Control | `/api/manual-control/*` | `/manual-control/*` | `/ics/taskOrder/addTask` |
+| Troubleshooting | `/api/troubleshooting/*` | `/troubleshooting/*` | - |
+| Status Checker | - | - | `/ics/out/task/getTaskOrderStatus` |
+
+## Key Features
+
+- **Separation of Concerns**: Clear separation between UI, business logic, and robot control
+- **RESTful API**: Standard HTTP methods (GET, POST) for all operations
+- **Task Monitoring**: Background service monitors robot task execution
+- **Centralized Troubleshooting**: Unified reset functionality across all modules
+- **Manual Override**: Manual control capability for direct robot operation
+
+## Error Handling
+
+All modules include reset functionality through the troubleshooting endpoints, allowing operators to:
+- Clear stuck tasks
+- Reset system states
+- Recover from error conditions
+- Reinitialize workflows
+---
 
 ## Part Handling
 
