@@ -302,20 +302,6 @@ The external Robot Control System provides two main endpoints:
 6. **Response**: Backend returns response to frontend
 7. **UI Update**: Frontend updates the user interface based on response
 
-### Example: Starting Part Preparation
-
-```
-User clicks "Start" button
-  → ParePreparation.js: Axios POST to /api/pare-preparation/update-status
-    → Backend parePreparation.js: router.post('/pare-preparation/update-status')
-      → Updates database status
-      → Axios POST to Robot API /ics/taskOrder/addTask
-        → Robot receives task and begins execution
-      ← Robot returns task order ID
-    ← Backend returns success response
-  ← Frontend updates UI to show "In Progress"
-```
-
 ## Technology Stack
 
 - **Frontend**: React, Axios
@@ -339,24 +325,9 @@ User clicks "Start" button
 | Troubleshooting | `/api/troubleshooting/*` | `/troubleshooting/*` | - |
 | Status Checker | - | - | `/ics/out/task/getTaskOrderStatus` |
 
-## Key Features
-
-- **Separation of Concerns**: Clear separation between UI, business logic, and robot control
-- **RESTful API**: Standard HTTP methods (GET, POST) for all operations
-- **Task Monitoring**: Background service monitors robot task execution
-- **Centralized Troubleshooting**: Unified reset functionality across all modules
-- **Manual Override**: Manual control capability for direct robot operation
-
-## Error Handling
-
-All modules include reset functionality through the troubleshooting endpoints, allowing operators to:
-- Clear stuck tasks
-- Reset system states
-- Recover from error conditions
-- Reinitialize workflows
 ---
-
-## Part Handling
+## Operation Flow
+### Part Handling
 
 ```mermaid
 sequenceDiagram
@@ -436,7 +407,7 @@ This sequence forms the basic “pick & return” workflow for DY operations.
 
 ---
 
-## Motor Handling
+### Motor Handling
 
 ```mermaid
 sequenceDiagram
@@ -517,7 +488,7 @@ This allows controlled concurrency and prevents both FG lanes from being used si
 
 ---
 
-## Packing Material Handling
+### Packing Material Handling
 
 ```mermaid
 sequenceDiagram
