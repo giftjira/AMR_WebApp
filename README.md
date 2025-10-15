@@ -268,7 +268,7 @@ Express endpoints for diagnostics:
 - `GET /troubleshooting/pack-rows` - Fetches pack row data
 - `POST /troubleshooting/reset` - Resets system states
 
-### 3. Robot API Layer (172.16.16.210:7000)
+### 3. Robot API Layer (172.16.16.209:7000)
 
 The external Robot Control System provides two main endpoints:
 
