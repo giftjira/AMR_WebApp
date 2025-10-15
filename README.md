@@ -67,138 +67,126 @@ Workers interact with AMR via a web app accessible on Panel PCs and handheld dev
 ## Architecture Diagram
 
 ```mermaid
-graph TB
-    subgraph Frontend["Frontend"]
+---
+config:
+  layout: elk
+---
+flowchart LR
+ subgraph PP["ParePreparation.js"]
+        PP1["Axios GET<br>172.16.16.210:3001<br>/api/pare-preparation"]
+        PP2["Axios POST<br>172.16.16.210:3001<br>/api/pare-preparation/update-selected-end-spot"]
+        PP3["Axios GET<br>172.16.16.210:3001<br>/api/motor-models"]
+        PP4["Axios POST<br>172.16.16.210:3001<br>/api/pare-preparation/update-motor-model"]
+        PP5["Axios POST<br>172.16.16.210:3001<br>/api/pare-preparation/update-status"]
+        PP6["Axios POST<br>172.16.16.210:3001<br>/api/troubleshooting/reset"]
+  end
+ subgraph VT["Virtual.js"]
+        VT1["Axios GET<br>172.16.16.210:3001<br>/api/virtual-data"]
+        VT2["Axios POST<br>172.16.16.210:3001<br>/api/virtual-update-status"]
+        VT3["Axios POST<br>172.16.16.210:3001<br>/api/troubleshooting/reset"]
+  end
+ subgraph PKP["PickingPreparation.js"]
+        PKP1["Axios GET<br>172.16.16.210:3001<br>/api/packing-preparation"]
+        PKP2["Axios POST<br>172.16.16.210:3001<br>/api/packing-preparation/update-selected-start-spot"]
+        PKP3["Axios POST<br>172.16.16.210:3001<br>/api/packing-preparation/update-status"]
+        PKP4["Axios POST<br>172.16.16.210:3001<br>/api/troubleshooting/reset"]
+  end
+ subgraph MC["ManualControl.js"]
+        MC1["Axios GET<br>172.16.16.210:3001<br>/api/locations"]
+        MC2["Axios POST<br>172.16.16.210:3001<br>/api/manual-control/move"]
+  end
+ subgraph TS["Troubleshooting.js"]
+        TS1["Axios GET<br>172.16.16.210:3001<br>/api/troubleshooting/options"]
+        TS2["Axios GET<br>172.16.16.210:3001<br>/api/troubleshooting/part-rows"]
+        TS3["Axios GET<br>172.16.16.210:3001<br>/api/troubleshooting/pack-rows"]
+        TS4["Axios POST<br>172.16.16.210:3001<br>/api/troubleshooting/reset"]
+  end
+ subgraph Frontend["Frontend"]
         App["App.js"]
-        
-        subgraph PP["ParePreparation.js"]
-            PP1["Axios GET<br/>172.16.16.210:3001<br/>/api/pare-preparation"]
-            PP2["Axios POST<br/>172.16.16.210:3001<br/>/api/pare-preparation/update-selected-end-spot"]
-            PP3["Axios GET<br/>172.16.16.210:3001<br/>/api/motor-models"]
-            PP4["Axios POST<br/>172.16.16.210:3001<br/>/api/pare-preparation/update-motor-model"]
-            PP5["Axios POST<br/>172.16.16.210:3001<br/>/api/pare-preparation/update-status"]
-            PP6["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
-        end
-        
-        subgraph VT["Virtual.js"]
-            VT1["Axios GET<br/>172.16.16.210:3001<br/>/api/virtual-data"]
-            VT2["Axios POST<br/>172.16.16.210:3001<br/>/api/virtual-update-status"]
-            VT3["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
-        end
-        
-        subgraph PKP["PickingPreparation.js"]
-            PKP1["Axios GET<br/>172.16.16.210:3001<br/>/api/packing-preparation"]
-            PKP2["Axios POST<br/>172.16.16.210:3001<br/>/api/packing-preparation/update-selected-start-spot"]
-            PKP3["Axios POST<br/>172.16.16.210:3001<br/>/api/packing-preparation/update-status"]
-            PKP4["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
-        end
-        
-        subgraph MC["ManualControl.js"]
-            MC1["Axios GET<br/>172.16.16.210:3001<br/>/api/locations"]
-            MC2["Axios POST<br/>172.16.16.210:3001<br/>/api/manual-control/move"]
-        end
-        
-        subgraph TS["Troubleshooting.js"]
-            TS1["Axios GET<br/>172.16.16.210:3001<br/>/api/troubleshooting/options"]
-            TS2["Axios GET<br/>172.16.16.210:3001<br/>/api/troubleshooting/part-rows"]
-            TS3["Axios GET<br/>172.16.16.210:3001<br/>/api/troubleshooting/pack-rows"]
-            TS4["Axios POST<br/>172.16.16.210:3001<br/>/api/troubleshooting/reset"]
-        end
-    end
-    
-    subgraph Backend["Backend - app.js (172.16.16.210:3001)"]
-        subgraph PPB["parePreparation.js"]
-            PPB1["Express GET<br/>router.get<br/>/pare-preparation"]
-            PPB2["Express POST<br/>router.post<br/>/pare-preparation/update-selected-end-spot"]
-            PPB3["Express GET<br/>router.get<br/>/motor-models"]
-            PPB4["Express POST<br/>router.post<br/>/pare-preparation/update-motor-model"]
-            PPB5["Express POST<br/>router.post<br/>/pare-preparation/update-status"]
-            PPB6["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
-        end
-        
-        subgraph VTB["virtualData.js"]
-            VTB1["Express GET<br/>router.get<br/>/virtual-data"]
-            VTB2["Express POST<br/>router.post<br/>/virtual-update-status"]
-            VTB3["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
-        end
-        
-        subgraph TSKB["taskStatusChecker.js"]
-            TSKB1["Axios POST<br/>172.16.16.210:7000<br/>/ics/out/task/getTaskOrderStatus"]
-        end
-        
-        subgraph PKPB["packingPreparation.js"]
-            PKPB1["Express GET<br/>router.get<br/>/packing-preparation"]
-            PKPB2["Express POST<br/>router.post<br/>/packing-preparation/update-selected-start-spot"]
-            PKPB3["Express POST<br/>router.post<br/>/packing-preparation/update-status"]
-            PKPB4["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
-        end
-        
-        subgraph MCB["manualControl.js"]
-            MCB1["Express GET<br/>router.get<br/>/locations"]
-            MCB2["Express POST<br/>router.post<br/>/manual-control/move"]
-            MCB3["Axios POST<br/>172.16.16.210:7000<br/>/ics/taskOrder/addTask"]
-        end
-        
-        subgraph TSB["troubleshooting.js"]
-            TSB1["Express GET<br/>router.get<br/>/troubleshooting/options"]
-            TSB2["Express GET<br/>router.get<br/>/troubleshooting/part-rows"]
-            TSB3["Express GET<br/>router.get<br/>/troubleshooting/pack-rows"]
-            TSB4["Express POST<br/>router.post<br/>/troubleshooting/reset"]
-        end
-    end
-    
-    subgraph Robot["Robot API (172.16.16.210:7000)"]
-        R1["HTTP POST<br/>/ics/taskOrder/addTask<br/>payload: taskOrder"]
-        R2["HTTP POST<br/>/ics/out/task/getTaskOrderStatus<br/>payload: orderId"]
-    end
-    
-    App --> PP
-    App --> VT
-    App --> PKP
-    App --> MC
-    App --> TS
-    
-    PP1 -->|HTTP Request| PPB1
-    PP2 -->|HTTP Request| PPB2
-    PP3 -->|HTTP Request| PPB3
-    PP4 -->|HTTP Request| PPB4
-    PP5 -->|HTTP Request| PPB5
-    PP6 -->|HTTP Request| TSB4
-    
-    VT1 -->|HTTP Request| VTB1
-    VT2 -->|HTTP Request| VTB2
-    VT3 -->|HTTP Request| TSB4
-    
-    PKP1 -->|HTTP Request| PKPB1
-    PKP2 -->|HTTP Request| PKPB2
-    PKP3 -->|HTTP Request| PKPB3
-    PKP4 -->|HTTP Request| TSB4
-    
-    MC1 -->|HTTP Request| MCB1
-    MC2 -->|HTTP Request| MCB2
-    
-    TS1 -->|HTTP Request| TSB1
-    TS2 -->|HTTP Request| TSB2
-    TS3 -->|HTTP Request| TSB3
-    TS4 -->|HTTP Request| TSB4
-    
-    PPB5 -->|Triggers| PPB6
-    PPB6 -->|HTTP Request| R1
-    
-    VTB2 -->|Triggers| VTB3
-    VTB3 -->|HTTP Request| R1
-    
-    TSKB1 -->|HTTP Request| R2
-    
-    PKPB3 -->|Triggers| PKPB4
-    PKPB4 -->|HTTP Request| R1
-    
-    MCB2 -->|Triggers| MCB3
-    MCB3 -->|HTTP Request| R1
-    
+        PP
+        VT
+        PKP
+        MC
+        TS
+  end
+ subgraph PPB["parePreparation.js"]
+        PPB1["Express GET<br>router.get<br>/pare-preparation"]
+        PPB2["Express POST<br>router.post<br>/pare-preparation/update-selected-end-spot"]
+        PPB3["Express GET<br>router.get<br>/motor-models"]
+        PPB4["Express POST<br>router.post<br>/pare-preparation/update-motor-model"]
+        PPB5["Express POST<br>router.post<br>/pare-preparation/update-status"]
+        PPB6["Axios POST<br>172.16.16.209:7000<br>/ics/taskOrder/addTask"]
+  end
+ subgraph VTB["virtualData.js"]
+        VTB1["Express GET<br>router.get<br>/virtual-data"]
+        VTB2["Express POST<br>router.post<br>/virtual-update-status"]
+        VTB3["Axios POST<br>172.16.16.209:7000<br>/ics/taskOrder/addTask"]
+  end
+ subgraph TSKB["taskStatusChecker.js"]
+        TSKB1["Axios POST<br>172.16.16.209:7000<br>/ics/out/task/getTaskOrderStatus"]
+  end
+ subgraph PKPB["packingPreparation.js"]
+        PKPB1["Express GET<br>router.get<br>/packing-preparation"]
+        PKPB2["Express POST<br>router.post<br>/packing-preparation/update-selected-start-spot"]
+        PKPB3["Express POST<br>router.post<br>/packing-preparation/update-status"]
+        PKPB4["Axios POST<br>172.16.16.209:7000<br>/ics/taskOrder/addTask"]
+  end
+ subgraph MCB["manualControl.js"]
+        MCB1["Express GET<br>router.get<br>/locations"]
+        MCB2["Express POST<br>router.post<br>/manual-control/move"]
+        MCB3["Axios POST<br>172.16.16.209:7000<br>/ics/taskOrder/addTask"]
+  end
+ subgraph TSB["troubleshooting.js"]
+        TSB1["Express GET<br>router.get<br>/troubleshooting/options"]
+        TSB2["Express GET<br>router.get<br>/troubleshooting/part-rows"]
+        TSB3["Express GET<br>router.get<br>/troubleshooting/pack-rows"]
+        TSB4["Express POST<br>router.post<br>/troubleshooting/reset"]
+  end
+ subgraph Backend["Backend - app.js (172.16.16.210:3001)"]
+        PPB
+        VTB
+        TSKB
+        PKPB
+        MCB
+        TSB
+  end
+ subgraph Robot["Robot API (172.16.16.209:7000)"]
+        R1["HTTP POST<br>/ics/taskOrder/addTask<br>payload: taskOrder"]
+        R2["HTTP POST<br>/ics/out/task/getTaskOrderStatus<br>payload: orderId"]
+  end
+    App --> PP & VT & PKP & MC & TS
+    PP1 -- HTTP Request --> PPB1
+    PP2 -- HTTP Request --> PPB2
+    PP3 -- HTTP Request --> PPB3
+    PP4 -- HTTP Request --> PPB4
+    PP5 -- HTTP Request --> PPB5
+    PP6 -- HTTP Request --> TSB4
+    VT1 -- HTTP Request --> VTB1
+    VT2 -- HTTP Request --> VTB2
+    VT3 -- HTTP Request --> TSB4
+    PKP1 -- HTTP Request --> PKPB1
+    PKP2 -- HTTP Request --> PKPB2
+    PKP3 -- HTTP Request --> PKPB3
+    PKP4 -- HTTP Request --> TSB4
+    MC1 -- HTTP Request --> MCB1
+    MC2 -- HTTP Request --> MCB2
+    TS1 -- HTTP Request --> TSB1
+    TS2 -- HTTP Request --> TSB2
+    TS3 -- HTTP Request --> TSB3
+    TS4 -- HTTP Request --> TSB4
+    PPB5 -- Triggers --> PPB6
+    PPB6 -- HTTP Request --> R1
+    VTB2 -- Triggers --> VTB3
+    VTB3 -- HTTP Request --> R1
+    TSKB1 -- HTTP Request --> R2
+    PKPB3 -- Triggers --> PKPB4
+    PKPB4 -- HTTP Request --> R1
+    MCB2 -- Triggers --> MCB3
+    MCB3 -- HTTP Request --> R1
     style Frontend fill:#e1f5ff
     style Backend fill:#fff4e1
     style Robot fill:#ffe1e1
+
 ```
 
 ## System Components
