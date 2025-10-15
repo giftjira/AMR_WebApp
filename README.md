@@ -300,7 +300,7 @@ The external Robot Control System provides two main endpoints:
 ## Network Configuration
 
 - **Frontend Server**: 172.16.16.210:3001 (serves React app and API)
-- **Robot Controller**: 172.16.16.210:7000 (ICS Robot Control System)
+- **Robot Controller**: 172.16.16.209:7000 (ICS Robot Control System)
 
 ## API Endpoints Summary
 
